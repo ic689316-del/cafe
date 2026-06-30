@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BREW & CHILL - Premium Kiosk</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Noto Sans KR Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .scrollbar-hide {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen antialiased">
+
+  <!-- HEADER -->
+  <header className="sticky top-0 z-10 backdrop-blur-md bg-white/95 border-b border-slate-200/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-amber-500 text-white p-2.5 rounded-2xl shadow-lg shadow-amber-500/20">
+          <!-- Coffee Icon -->
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6.5 0a3.5 3.5 0 1 1-7 0m7 0h1.5a2.5 2.5 0 0 0 2.5-2.5V11a2.5 2.5 0 0 0-2.5-2.5H18.5M6 14H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3M6 4h12" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-1.5">
+            BREW & CHILL <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Premium Kiosk</span>
+          </h1>
+          <p class="text-xs text-slate-500 font-medium">신선한 원두와 최상의 레시피로 선사하는 일상 속 여유</p>
+        </div>
+      </div>
+      
+      <!-- SEARCH BAR -->
+      <div class="relative max-w-md w-full">
+        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637Z" />
+          </svg>
+        </span>
+        <input 
+          id="search-input"
+          type="text" 
+          placeholder="찾으시는 음료를 검색해 보세요..." 
+          class="w-full bg-slate-100 border border-slate-200/80 rounded-xl py-2 pl-10 pr-10 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition"
+          oninput="handleSearch(this.value)"
+        />
+        <button 
+          id="clear-search-btn"
+          onclick="clearSearch()"
+          class="absolute right-3 top-1/2 -translate-y-1/2 hover:text-slate-900 text-slate-400 hidden"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-6 sm:px-6 lg:px-8 flex flex-col lg:flex-row gap-8">
+    
+    <!-- LEFT PANEL: CATEGORIES & PRODUCT GRID -->
+    <div class="flex-1 flex flex-col gap-6">
+      
+      <!-- CATEGORY NAV -->
+      <div id="category-nav" class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <!-- Dynamically Rendered Category Buttons -->
+      </div>
+
+      <!-- PRODUCT GRID -->
+      <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+        <!-- Dynamically Rendered Product Cards -->
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: CART -->
+    <div class="w-full lg:w-[380px] bg-white border border-slate-200 rounded-3xl flex flex-col shadow-lg h-[calc(100vh-140px)] min-h-[560px] sticky top-24">
+      
+      <!-- Cart Header -->
+      <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-3xl">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+          </svg>
+          <h2 class="text-base font-bold text-slate-800">주문내역</h2>
+          <span id="cart-badge" class="bg-amber-500 text-white font-extrabold text-xs px-2 py-0.5 rounded-full">0</span>
+        </div>
+        <button 
+          id="clear-cart-btn"
+          onclick="clearCart()"
+          class="text-xs text-slate-400 hover:text-rose-500 flex items-center gap-1 transition hidden"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+          </svg>
+          전체 비우기
+        </button>
+      </div>
+
+      <!-- Cart Item Container -->
+      <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-4">
+        <!-- Rendered Cart Items or Empty state -->
+      </div>
+
+      <!-- Price Totals & Actions -->
+      <div class="p-5 border-t border-slate-100 bg-slate-50 rounded-b-3xl">
+        <div class="space-y-2 mb-4">
+          <div class="flex justify-between text-xs text-slate-500">
+            <span>공급가액</span>
+            <span id="subtotal-price">0원</span>
+          </div>
+          <div class="flex justify-between text-xs text-slate-500">
+            <span>부가세 (10%)</span>
+            <span id="vat-price">0원</span>
+          </div>
+          <div class="h-px bg-slate-200 my-1"></div>
+          <div class="flex justify-between items-baseline">
+            <span class="text-sm font-bold text-slate-700">총 결제 금액</span>
+            <span id="total-price" class="text-xl font-extrabold text-amber-600">0원</span>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <!-- Checkout Button -->
+          <button 
+            id="checkout-btn"
+            disabled
+            onclick="openCheckout()"
+            class="w-full py-3 bg-slate-200 text-slate-400 font-bold rounded-2xl flex items-center justify-center gap-2 cursor-not-allowed transition duration-200"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            주문하기 (결제요청)
+          </button>
+
+          <!-- Download Action Controls -->
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              id="excel-download-btn"
+              disabled
+              onclick="downloadExcel()"
+              class="py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed transition"
+              title="장바구니 품목을 엑셀(CSV) 파일로 저장합니다"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              엑셀 저장
+            </button>
+
+            <button
+              onclick="downloadSelfHTML()"
+              class="py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 transition shadow-sm"
+              title="이 전체 프로그램 코드를 .html 단일 파일로 완전하게 소장합니다"
+            >
+              <svg class="w-3.5 h-3.5 text-blue-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              HTML 다운
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-100 border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-12">
+    <p>© 2026 BREW & CHILL. All rights reserved.</p>
+    <p class="mt-1">해당 웹앱은 브루 앤 칠의 프리미엄 음료 선별 키오스크 시뮬레이터 프로그램입니다.</p>
+  </footer>
+
+  <!-- CUSTOMIZATION DIALOG (MODAL) -->
+  <div id="custom-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto hidden">
+    <div class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl relative">
+      <!-- Close Button -->
+      <button 
+        onclick="closeCustomization()"
+        class="absolute right-4 top-4 text-slate-400 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Modal Info Section -->
+      <div class="bg-gradient-to-b from-slate-50 to-transparent p-6 text-center">
+        <div id="modal-drink-image" class="text-6xl mb-3">☕</div>
+        <h3 id="modal-drink-name" class="text-xl font-bold text-slate-800">아메리카노</h3>
+        <p id="modal-drink-english" class="text-xs text-slate-400 font-mono">Americano</p>
+        <p id="modal-drink-description" class="text-sm text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">음료 정보 상세 설명</p>
+      </div>
+
+      <!-- Config Section -->
+      <div class="p-6 space-y-5 border-t border-slate-100 max-h-[45vh] overflow-y-auto">
+        
+        <!-- Temp Control -->
+        <div id="temp-control-section">
+          <h4 class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">온도 선택</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <button id="temp-hot-btn" onclick="selectTemp('Hot')" class="py-3.5 rounded-xl font-bold flex items-center justify-center gap-1.5 border transition">
+              <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" />
+              </svg>
+              HOT
+            </button>
+            <button id="temp-ice-btn" onclick="selectTemp('Ice')" class="py-3.5 rounded-xl font-bold flex items-center justify-center gap-1.5 border transition">
+              <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18M3 12h18m-3-3-3 3 3 3M6 9l3 3-3 3" />
+              </svg>
+              ICE
+            </button>
+          </div>
+        </div>
+
+        <!-- Size Control -->
+        <div>
+          <h4 class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">사이즈 선택</h4>
+          <div class="grid grid-cols-3 gap-2">
+            <button id="size-medium-btn" onclick="selectSize('Medium')" class="p-3 rounded-xl border flex flex-col items-center justify-center transition">
+              <span class="text-xs font-bold">Medium</span>
+              <span class="text-[10px] text-slate-400 mt-0.5">기본 용량</span>
+              <span class="text-[10px] font-bold text-amber-600 mt-1">+0원</span>
+            </button>
+            <button id="size-large-btn" onclick="selectSize('Large')" class="p-3 rounded-xl border flex flex-col items-center justify-center transition">
+              <span class="text-xs font-bold">Large</span>
+              <span class="text-[10px] text-slate-400 mt-0.5">약 500ml</span>
+              <span class="text-[10px] font-bold text-amber-600 mt-1">+500원</span>
+            </button>
+            <button id="size-xlarge-btn" onclick="selectSize('Extra Large')" class="p-3 rounded-xl border flex flex-col items-center justify-center transition">
+              <span class="text-xs font-bold">XL</span>
+              <span class="text-[10px] text-slate-400 mt-0.5">약 700ml</span>
+              <span class="text-[10px] font-bold text-amber-600 mt-1">+1,000원</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sweetness Control -->
+        <div>
+          <h4 class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">당도 조절</h4>
+          <div class="grid grid-cols-4 gap-2">
+            <button id="sweet-0-btn" onclick="selectSweet('0%')" class="py-2 rounded-xl border text-xs font-bold transition">0%</button>
+            <button id="sweet-30-btn" onclick="selectSweet('30%')" class="py-2 rounded-xl border text-xs font-bold transition">30%</button>
+            <button id="sweet-50-btn" onclick="selectSweet('50%')" class="py-2 rounded-xl border text-xs font-bold transition">50%</button>
+            <button id="sweet-100-btn" onclick="selectSweet('100%')" class="py-2 rounded-xl border text-xs font-bold transition">100%</button>
+          </div>
+        </div>
+
+        <!-- Ice level (only visible if Ice Temp selected) -->
+        <div id="ice-control-section">
+          <h4 class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">얼음량 조절</h4>
+          <div class="grid grid-cols-4 gap-2">
+            <button id="ice-none-btn" onclick="selectIce('No')" class="py-2 rounded-xl border text-xs font-bold transition">안함</button>
+            <button id="ice-less-btn" onclick="selectIce('Less')" class="py-2 rounded-xl border text-xs font-bold transition">적게</button>
+            <button id="ice-regular-btn" onclick="selectIce('Regular')" class="py-2 rounded-xl border text-xs font-bold transition">보통</button>
+            <button id="ice-extra-btn" onclick="selectIce('Extra')" class="py-2 rounded-xl border text-xs font-bold transition">많이</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-6 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+        <div>
+          <p class="text-xs text-slate-500 font-medium">선택 옵션 포함 금액</p>
+          <p id="modal-total-price" class="text-2xl font-extrabold text-amber-600 mt-0.5">3,500원</p>
+        </div>
+        <button
+          onclick="addCurrentToCart()"
+          class="bg-amber-500 hover:bg-amber-400 text-white font-bold px-6 py-3 rounded-2xl flex items-center gap-1.5 active:scale-95 transition"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007" />
+          </svg>
+          장바구니 담기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKOUT RECEIPT MODAL -->
+  <div id="receipt-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Icon Indicator -->
+      <div class="text-center pb-5">
+        <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0Z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-slate-800">주문이 성공적으로 접수되었습니다!</h3>
+        <p class="text-xs text-slate-400 mt-1">대기번호 번호표를 지참하시어 대기해 주십시오.</p>
+      </div>
+
+      <!-- Paper Receipt Layout -->
+      <div class="bg-slate-50 text-slate-900 p-5 rounded-2xl font-mono text-xs shadow-inner relative border border-slate-200">
+        <div class="text-center border-b border-dashed border-slate-300 pb-4">
+          <p class="font-extrabold text-sm tracking-wide text-slate-800">BREW & CHILL</p>
+          <p class="text-[10px] text-slate-400 mt-0.5">서울 마포구 와우산로 123</p>
+          <div class="mt-3 bg-slate-800 text-white py-1.5 px-4 rounded-md inline-block">
+            <span id="receipt-waiting-no" class="font-bold text-xs">대기번호: 1042번</span>
+          </div>
+        </div>
+
+        <!-- Items inside receipt -->
+        <div id="receipt-items-list" class="py-4 border-b border-dashed border-slate-300 space-y-3">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Receipt financial details -->
+        <div class="pt-3 space-y-1.5 text-slate-600">
+          <div class="flex justify-between">
+            <span>공급가액</span>
+            <span id="receipt-subtotal">0원</span>
+          </div>
+          <div class="flex justify-between">
+            <span>부가세 (10%)</span>
+            <span id="receipt-vat">0원</span>
+          </div>
+          <div class="flex justify-between font-extrabold text-sm border-t border-slate-200 pt-2 text-slate-900">
+            <span>총 결제액</span>
+            <span id="receipt-total">0원</span>
+          </div>
+        </div>
+
+        <!-- Receipt bottom date metadata -->
+        <div class="text-center pt-4 text-[10px] text-slate-400 border-t border-slate-200 mt-4">
+          <p id="receipt-date">주문일시: 2026-06-30 14:23</p>
+          <p class="mt-1 font-bold text-slate-500">이용해 주셔서 진심으로 감사합니다!</p>
+        </div>
+      </div>
+
+      <!-- Reset and confirm button -->
+      <button 
+        onclick="confirmReceipt()" 
+        class="mt-5 w-full bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl font-bold transition"
+      >
+        확인 및 완료
+      </button>
+
+    </div>
+  </div>
+
+  <!-- APPLICATION CORE SCRIPT -->
+  <script>
+    // DRINK DATA MODEL
+    const DRINK_MENU = [
+      {
+        id: 'c1',
+        name: '에스프레소',
+        englishName: 'Espresso',
+        category: 'Coffee',
+        price: 3000,
+        image: '☕',
+        description: '고온 고압으로 추출한 가장 진한 전통 이탈리안 커피',
+        options: { temp: ['Hot'], defaultTemp: 'Hot' }
+      },
+      {
+        id: 'c2',
+        name: '아메리카노',
+        englishName: 'Americano',
+        category: 'Coffee',
+        price: 3500,
+        image: '☕',
+        description: '에스프레소에 부드러운 뜨거운 물을 더해 깊고 깔끔한 맛',
+        options: { temp: ['Hot', 'Ice'], defaultTemp: 'Ice' }
+      },
+      {
+        id: 'c3',
+        name: '카페라떼',
+        englishName: 'Cafe Latte',
+        category: 'Coffee',
+        price: 4300,
+        image: '🥛',
+        description: '에스프레소와 고소하고 부드러운 스팀밀크의 만남',
+        options: { temp: ['Hot', 'Ice'], defaultTemp: 'Ice' }
+      },
+      {
+        id: 'c4',
+        name: '바닐라 라떼',
+        englishName: 'Vanilla Latte',
+        category: 'Coffee',
+        price: 4800,
+        image: '🍯',
+        description: '천연 바닐라 빈의 달콤함과 풍부한 우유의 조화',
+        options: { temp: ['Hot', 'Ice'], defaultTemp: 'Ice' }
+      },
+      {
+        id: 'c5',
+        name: '아인슈페너',
+        englishName: 'Einspanner',
+        category: 'Coffee',
+        price: 5500,
+        image: '🧁',
+        description: '아메리카노 위에 쫀득하고 달콤한 수제 크림을 얹은 음료',
+        options: { temp: ['Ice'], defaultTemp: 'Ice' }
+      },
+      {
+        id: 't1',
+        name: '말차 라떼',
+        englishName: 'Matcha Latte',
+        category: 'Tea & Latte',
+        price: 4800,
+        image: '🍵',
+        description: '제주 유기농 말차를 사용하여 깊고 진한 풍미의 라떼',
+        options: { temp: ['Hot', 'Ice'], defaultTemp: 'Ice' }
+      },
+      {
+        id: 't2',
+        name: '자몽 허니 블랙티',
+        englishName: 'Grapefruit Honey Black Tea',
+        category: 'Tea & Latte',
+        price: 5300,
+        image: '🍊',
+        description: '새콤달콤한 자몽과 꿀, 그리고 깊은 풍미의 홍차가 조화로운 차',
+        options: { temp: ['Hot', 'Ice'], defaultTemp: 'Ice' }
+      },
+      {
+        id: 't3',
+        name: '캐모마일 티',
+        englishName: 'Chamomile Tea',
+        category: 'Tea & Latte',
+        price: 4000,
+        image: '🌼',
+        description: '향긋하고 차분하게 마음을 가라앉혀 주는 허브 티',
+        options: { temp: ['Hot', 'Ice'], defaultTemp: 'Hot' }
+      },
+      {
+        id: 's1',
+        name: '딸기 요거트 스무디',
+        englishName: 'Strawberry Yogurt Smoothie',
+        category: 'Smoothie & Juice',
+        price: 5500,
+        image: '🍓',
+        description: '상큼한 국산 딸기와 건강한 요거트의 환상적인 블렌딩',
+        options: { temp: ['Ice'], defaultTemp: 'Ice' }
+      },
+      {
+        id: 's2',
+        name: '망고 스무디',
+        englishName: 'Mango Smoothie',
+        category: 'Smoothie & Juice',
+        price: 5500,
+        image: '🥭',
+        description: '잘 익은 망고 과육의 달콤하고 풍부한 맛을 그대로 갈아 만든 음료',
+        options: { temp: ['Ice'], defaultTemp: 'Ice' }
+      },
+      {
+        id: 's3',
+        name: '리얼 청포도 에이드',
+        englishName: 'Green Grape Ade',
+        category: 'Smoothie & Juice',
+        price: 5000,
+        image: '🍇',
+        description: '톡 쏘는 탄산수에 생 청포도 알갱이가 씹히는 청량한 에이드',
+        options: { temp: ['Ice'], defaultTemp: 'Ice' }
+      },
+      {
+        id: 'g1',
+        name: '오션 블루 에이드',
+        englishName: 'Ocean Blue Ade',
+        category: 'Signature',
+        price: 6000,
+        image: '🍹',
+        description: '푸른 바다를 닮은 소다맛 베이스에 레몬이 조화로운 시그니처 에이드',
+        options: { temp: ['Ice'], defaultTemp: 'Ice' }
+      },
+      {
+        id: 'g2',
+        name: '달고나 크림 라떼',
+        englishName: 'Dalgona Cream Latte',
+        category: 'Signature',
+        price: 5800,
+        image: '🍬',
+        description: '추억의 달고나 칩이 바삭하게 씹히는 중독성 강한 크림 라떼',
+        options: { temp: ['Hot', 'Ice'], defaultTemp: 'Ice' }
+      }
+    ];
+
+    const CATEGORIES = ['All', 'Coffee', 'Tea & Latte', 'Smoothie & Juice', 'Signature'];
+
+    // STATE CONTROLLERS
+    let activeCategory = 'All';
+    let searchQuery = '';
+    let cart = [];
+
+    // Customization Current Selection State
+    let customizingDrink = null;
+    let selectedTemp = 'Ice';
+    let selectedSize = 'Medium';
+    let selectedSweet = '50%';
+    let selectedIce = 'Regular';
+
+    // ON DOM LOAD
+    window.onload = function() {
+      renderCategories();
+      renderProducts();
+      renderCart();
+    };
+
+    // SEARCH LOGIC
+    function handleSearch(val) {
+      searchQuery = val;
+      const clearBtn = document.getElementById('clear-search-btn');
+      if (searchQuery.trim().length > 0) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+      renderProducts();
+    }
+
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      searchQuery = '';
+      document.getElementById('clear-search-btn').add('hidden');
+      renderProducts();
+    }
+
+    // CATEGORY UI RENDERER
+    function renderCategories() {
+      const container = document.getElementById('category-nav');
+      container.innerHTML = '';
+      CATEGORIES.forEach(cat => {
+        const isActive = activeCategory === cat;
+        const btn = document.createElement('button');
+        btn.onclick = () => {
+          activeCategory = cat;
+          renderCategories();
+          renderProducts();
+        };
+        btn.className = `px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
+          isActive 
+            ? 'bg-amber-500 text-white shadow-md shadow-amber-500/10' 
+            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+        }`;
+        btn.innerText = cat === 'All' ? '전체 메뉴' : cat;
+        container.appendChild(btn);
+      });
+    }
+
+    // MENU PRODUCTS RENDERER
+    function renderProducts() {
+      const grid = document.getElementById('product-grid');
+      grid.innerHTML = '';
+
+      const filtered = DRINK_MENU.filter(drink => {
+        const matchesCategory = activeCategory === 'All' || drink.category === activeCategory;
+        const matchesSearch = drink.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                              drink.englishName.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.className = "flex justify-center items-center w-full col-span-full";
+        grid.innerHTML = `
+          <div class="text-center py-20 bg-white border border-dashed border-slate-200 rounded-3xl w-full">
+            <svg class="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0Zm-9-3.75h.008v.008H12V8.25Z" />
+            </svg>
+            <p class="text-slate-500 font-medium">검색된 음료가 없습니다.</p>
+            <p class="text-sm text-slate-400 mt-1">다른 키워드로 검색을 시도해 보세요.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.className = "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5";
+      filtered.forEach(drink => {
+        const card = document.createElement('div');
+        card.onclick = () => openCustomization(drink);
+        card.className = "group bg-white hover:bg-slate-50/40 border border-slate-200/80 hover:border-amber-500/40 rounded-2xl p-5 cursor-pointer transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between shadow-sm hover:shadow-md relative overflow-hidden";
+        
+        let tempsHTML = '';
+        drink.options.temp.forEach(t => {
+          const isHot = t === 'Hot';
+          tempsHTML += `
+            <span class="text-[10px] font-bold px-2 py-1 rounded-md tracking-wider flex items-center gap-0.5 ${isHot ? 'bg-rose-50 text-rose-600' : 'bg-sky-50 text-sky-600'}">
+              ${isHot 
+                ? '<svg class="w-3 h-3 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" /></svg>' 
+                : '<svg class="w-3 h-3 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18M3 12h18m-3-3-3 3 3 3M6 9l3 3-3 3" /></svg>'
+              }
+              ${t}
+            </span>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-500/5 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform" />
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <div class="text-4xl bg-slate-100/70 p-3 rounded-2xl w-14 h-14 flex items-center justify-center border border-slate-200/60 group-hover:scale-105 transition-transform">
+                ${drink.image}
+              </div>
+              <div class="flex gap-1.5">${tempsHTML}</div>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-slate-800 group-hover:text-amber-600 transition-colors">${drink.name}</h3>
+              <p class="text-xs text-slate-400 font-mono mt-0.5">${drink.englishName}</p>
+              <p class="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed h-8">${drink.description}</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-base font-extrabold text-amber-600">${drink.price.toLocaleString()}원</span>
+            <span class="text-xs text-amber-600 group-hover:translate-x-1 transition-transform flex items-center gap-1 font-semibold">
+              주문하기 
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </span>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // CUSTOMIZATION DIALOG CONTROL
+    function openCustomization(drink) {
+      customizingDrink = drink;
+      selectedTemp = drink.options.defaultTemp;
+      selectedSize = 'Medium';
+      selectedSweet = '50%';
+      selectedIce = 'Regular';
+
+      document.getElementById('modal-drink-image').innerText = drink.image;
+      document.getElementById('modal-drink-name').innerText = drink.name;
+      document.getElementById('modal-drink-english').innerText = drink.englishName;
+      document.getElementById('modal-drink-description').innerText = drink.description;
+
+      // Handle Hot/Ice Option buttons visibility
+      const tempControl = document.getElementById('temp-control-section');
+      if (drink.options.temp.length > 1) {
+        tempControl.classList.remove('hidden');
+      } else {
+        tempControl.classList.add('hidden');
+      }
+
+      updateCustomizationUI();
+      document.getElementById('custom-modal').classList.remove('hidden');
+    }
+
+    function closeCustomization() {
+      customizingDrink = null;
+      document.getElementById('custom-modal').classList.add('hidden');
+    }
+
+    function selectTemp(temp) {
+      selectedTemp = temp;
+      updateCustomizationUI();
+    }
+
+    function selectSize(size) {
+      selectedSize = size;
+      updateCustomizationUI();
+    }
+
+    function selectSweet(sweet) {
+      selectedSweet = sweet;
+      updateCustomizationUI();
+    }
+
+    function selectIce(ice) {
+      selectedIce = ice;
+      updateCustomizationUI();
+    }
+
+    function calculateOptionPrice() {
+      let extra = 0;
+      if (selectedSize === 'Large') extra += 500;
+      if (selectedSize === 'Extra Large') extra += 1000;
+      return extra;
+    }
+
+    function updateCustomizationUI() {
+      if (!customizingDrink) return;
+
+      // Update Temp Buttons
+      const tempHot = document.getElementById('temp-hot-btn');
+      const tempIce = document.getElementById('temp-ice-btn');
+      
+      [tempHot, tempIce].forEach(btn => {
+        btn.className = "py-3.5 rounded-xl font-bold flex items-center justify-center gap-1.5 border transition";
+      });
+
+      if (selectedTemp === 'Hot') {
+        tempHot.classList.add('bg-rose-50', 'border-rose-500', 'text-rose-600', 'shadow-sm');
+        tempIce.classList.add('bg-white', 'border-slate-200', 'text-slate-400', 'hover:text-slate-700');
+        document.getElementById('ice-control-section').classList.add('hidden');
+      } else {
+        tempIce.classList.add('bg-sky-50', 'border-sky-500', 'text-sky-600', 'shadow-sm');
+        tempHot.classList.add('bg-white', 'border-slate-200', 'text-slate-400', 'hover:text-slate-700');
+        document.getElementById('ice-control-section').classList.remove('hidden');
+      }
+
+      // Sizes UI
+      ['Medium', 'Large', 'Extra Large'].forEach(sz => {
+        const id = sz === 'Medium' ? 'size-medium-btn' : sz === 'Large' ? 'size-large-btn' : 'size-xlarge-btn';
+        const btn = document.getElementById(id);
+        btn.className = "p-3 rounded-xl border flex flex-col items-center justify-center transition " + 
+          (selectedSize === sz ? "bg-amber-50 border-amber-400 text-amber-700 shadow-sm" : "bg-white border-slate-200 text-slate-400 hover:text-slate-700");
+      });
+
+      // Sweetness UI
+      ['0%', '30%', '50%', '100%'].forEach(sw => {
+        const id = `sweet-${sw.replace('%','')}-btn`;
+        const btn = document.getElementById(id);
+        btn.className = "py-2 rounded-xl border text-xs font-bold transition " +
+          (selectedSweet === sw ? "bg-amber-50 border-amber-400 text-amber-700 shadow-sm" : "bg-white border-slate-200 text-slate-400 hover:text-slate-700");
+      });
+
+      // Ice Level UI
+      ['No', 'Less', 'Regular', 'Extra'].forEach(ic => {
+        const id = ic === 'No' ? 'ice-none-btn' : ic === 'Less' ? 'ice-less-btn' : ic === 'Regular' ? 'ice-regular-btn' : 'ice-extra-btn';
+        const btn = document.getElementById(id);
+        btn.className = "py-2 rounded-xl border text-xs font-bold transition " +
+          (selectedIce === ic ? "bg-amber-50 border-amber-400 text-amber-700 shadow-sm" : "bg-white border-slate-200 text-slate-400 hover:text-slate-700");
+      });
+
+      // Total Modal Price Update
+      const itemPrice = customizingDrink.price + calculateOptionPrice();
+      document.getElementById('modal-total-price').innerText = itemPrice.toLocaleString() + '원';
+    }
+
+    // CART STATE MANAGEMENT
+    function addCurrentToCart() {
+      if (!customizingDrink) return;
+
+      const singleItemPrice = customizingDrink.price + calculateOptionPrice();
+      const cartId = `${customizingDrink.id}-${selectedTemp}-${selectedSize}-${selectedSweet}-${selectedIce}`;
+
+      const existingIndex = cart.findIndex(item => item.cartId === cartId);
+
+      if (existingIndex > -1) {
+        cart[existingIndex].quantity += 1;
+        cart[existingIndex].totalPrice = cart[existingIndex].quantity * cart[existingIndex].singleItemPrice;
+      } else {
+        cart.push({
+          cartId: cartId,
+          id: customizingDrink.id,
+          name: customizingDrink.name,
+          englishName: customizingDrink.englishName,
+          image: customizingDrink.image,
+          temp: selectedTemp,
+          size: selectedSize,
+          sweet: selectedSweet,
+          ice: selectedIce,
+          singleItemPrice: singleItemPrice,
+          quantity: 1,
+          totalPrice: singleItemPrice
+        });
+      }
+
+      closeCustomization();
+      renderCart();
+    }
+
+    function removeCartItem(cartId) {
+      cart = cart.filter(item => item.cartId !== cartId);
+      renderCart();
+    }
+
+    function adjustQuantity(cartId, delta) {
+      const idx = cart.findIndex(item => item.cartId === cartId);
+      if (idx === -1) return;
+
+      const item = cart[idx];
+      item.quantity += delta;
+      if (item.quantity <= 0) {
+        cart = cart.filter(it => it.cartId !== cartId);
+      } else {
+        item.totalPrice = item.quantity * item.singleItemPrice;
+      }
+      renderCart();
+    }
+
+    function clearCart() {
+      cart = [];
+      renderCart();
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cart-items');
+      const badge = document.getElementById('cart-badge');
+      const clearBtn = document.getElementById('clear-cart-btn');
+      
+      const subtotalEl = document.getElementById('subtotal-price');
+      const vatEl = document.getElementById('vat-price');
+      const totalEl = document.getElementById('total-price');
+      
+      const checkoutBtn = document.getElementById('checkout-btn');
+      const excelBtn = document.getElementById('excel-download-btn');
+
+      // Update badge count
+      const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+      badge.innerText = totalQty;
+
+      if (cart.length === 0) {
+        clearBtn.classList.add('hidden');
+        container.innerHTML = `
+          <div class="h-full flex flex-col justify-center items-center text-center text-slate-400 py-12">
+            <svg class="w-12 h-12 text-slate-200 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007" />
+            </svg>
+            <p class="font-semibold text-slate-500">장바구니가 비어 있습니다.</p>
+            <p class="text-xs text-slate-400 mt-1">왼쪽 메뉴에서 음료를 선택하세요!</p>
+          </div>
+        `;
+
+        subtotalEl.innerText = '0원';
+        vatEl.innerText = '0원';
+        totalEl.innerText = '0원';
+
+        checkoutBtn.disabled = true;
+        checkoutBtn.className = "w-full py-3 bg-slate-200 text-slate-400 font-bold rounded-2xl flex items-center justify-center gap-2 cursor-not-allowed transition duration-200";
+        
+        excelBtn.disabled = true;
+        excelBtn.className = "py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed transition";
+        return;
+      }
+
+      // Activate interactive elements
+      clearBtn.classList.remove('hidden');
+      checkoutBtn.disabled = false;
+      checkoutBtn.className = "w-full py-3 bg-amber-500 text-white hover:bg-amber-400 active:scale-[0.98] font-bold rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition duration-200 shadow-md shadow-amber-500/10";
+      
+      excelBtn.disabled = false;
+      excelBtn.className = "py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer transition shadow-sm";
+
+      // Render items
+      container.innerHTML = '';
+      let sumPrice = 0;
+
+      cart.forEach(item => {
+        sumPrice += item.totalPrice;
+        const itemEl = document.createElement('div');
+        itemEl.className = "bg-slate-50 hover:bg-slate-100/70 border border-slate-100 p-3.5 rounded-2xl flex gap-3 transition";
+        
+        itemEl.innerHTML = `
+          <div class="text-2xl bg-white p-2 rounded-xl h-11 w-11 flex items-center justify-center border border-slate-200">${item.image}</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-start gap-1">
+              <h4 class="text-xs font-bold text-slate-800 truncate">${item.name}</h4>
+              <button 
+                onclick="removeCartItem('${item.cartId}')"
+                class="text-slate-400 hover:text-rose-600 p-1 hover:bg-rose-50 rounded transition"
+                title="삭제"
+              >
+                <!-- Trash2 Icon -->
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.34 9m-4.78 0L9 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                </svg>
+              </button>
+            </div>
+            
+            <div class="flex flex-wrap gap-1 mt-1">
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${item.temp === 'Hot' ? 'bg-rose-50 text-rose-600' : 'bg-sky-50 text-sky-600'}">${item.temp}</span>
+              <span class="text-[9px] font-medium bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">${item.size}</span>
+              <span class="text-[9px] font-medium bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">당도: ${item.sweet}</span>
+              ${item.temp === 'Ice' ? `<span class="text-[9px] font-medium bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">얼음: ${item.ice}</span>` : ''}
+            </div>
+
+            <div class="flex justify-between items-center mt-3 pt-2.5 border-t border-slate-200/60">
+              <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2 py-0.5">
+                <button onclick="adjustQuantity('${item.cartId}', -1)" class="text-slate-500 hover:text-slate-800 transition">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" /></svg>
+                </button>
+                <span class="text-xs font-extrabold text-slate-800 min-w-4 text-center">${item.quantity}</span>
+                <button onclick="adjustQuantity('${item.cartId}', 1)" class="text-slate-500 hover:text-slate-800 transition">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                </button>
+              </div>
+              <span class="text-xs font-extrabold text-slate-800">${item.totalPrice.toLocaleString()}원</span>
+            </div>
+          </div>
+        `;
+        container.appendChild(itemEl);
+      });
+
+      const vat = Math.round(sumPrice * 0.1);
+      subtotalEl.innerText = (sumPrice - vat).toLocaleString() + '원';
+      vatEl.innerText = vat.toLocaleString() + '원';
+      totalEl.innerText = sumPrice.toLocaleString() + '원';
+    }
+
+    // CHECKOUT RECEIPT MODAL
+    function openCheckout() {
+      if (cart.length === 0) return;
+
+      const orderNo = Math.floor(1000 + Math.random() * 9000);
+      const nowStr = new Date().toLocaleString('ko-KR', { hour12: false });
+      const sumPrice = cart.reduce((acc, item) => acc + item.totalPrice, 0);
+      const vat = Math.round(sumPrice * 0.1);
+
+      document.getElementById('receipt-waiting-no').innerText = `대기번호: ${orderNo}번`;
+      document.getElementById('receipt-date').innerText = `주문일시: ${nowStr}`;
+      document.getElementById('receipt-subtotal').innerText = (sumPrice - vat).toLocaleString() + '원';
+      document.getElementById('receipt-vat').innerText = vat.toLocaleString() + '원';
+      document.getElementById('receipt-total').innerText = sumPrice.toLocaleString() + '원';
+
+      const itemsList = document.getElementById('receipt-items-list');
+      itemsList.innerHTML = '';
+
+      cart.forEach(item => {
+        const row = document.createElement('div');
+        row.className = "space-y-0.5";
+        row.innerHTML = `
+          <div class="flex justify-between font-bold text-slate-800">
+            <span>${item.name} x ${item.quantity}</span>
+            <span>${item.totalPrice.toLocaleString()}원</span>
+          </div>
+          <div class="text-[10px] text-slate-400 flex flex-wrap gap-x-1.5">
+            <span>[${item.temp}]</span>
+            <span>[${item.size}]</span>
+            <span>[당도: ${item.sweet}]</span>
+            ${item.temp === 'Ice' ? `<span>[얼음: ${item.ice}]</span>` : ''}
+          </div>
+        `;
+        itemsList.appendChild(row);
+      });
+
+      document.getElementById('receipt-modal').classList.remove('hidden');
+    }
+
+    function confirmReceipt() {
+      document.getElementById('receipt-modal').classList.add('hidden');
+      clearCart();
+    }
+
+    // EXCEL / CSV EXPORT
+    function downloadExcel() {
+      if (cart.length === 0) return;
+
+      const BOM = '\uFEFF';
+      const headers = ['메뉴 ID', '메뉴명', '영문명', '온도', '사이즈', '당도', '얼음량', '수량', '단가(원)', '합계금액(원)'];
+      const rows = cart.map(item => [
+        item.id,
+        item.name,
+        item.englishName,
+        item.temp,
+        item.size,
+        item.sweet,
+        item.temp === 'Ice' ? item.ice : 'N/A',
+        item.quantity,
+        item.singleItemPrice,
+        item.totalPrice
+      ]);
+
+      const csvContent = BOM + [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `장바구니내역_${new Date().toISOString().slice(0, 10)}.csv`);
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // DOWNLOAD Live HTML file (Self Packaging)
+    function downloadSelfHTML() {
+      // Get exact runtime HTML string
+      const fullDoc = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([fullDoc], { type: 'text/html;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'kiosk_app.html');
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
